@@ -17,7 +17,7 @@ const setLead = asyncHandler(async (req, res) => {
     }
   }
 
-  const goal = await Lead.create({
+  const lead = await Lead.create({
     name: req.body.name,
     company: req.body.company,
     email: req.body.email,
@@ -27,15 +27,34 @@ const setLead = asyncHandler(async (req, res) => {
     status: req.body.status,
   });
 
-  res.status(200).json(goal);
+  res.status(200).json(lead);
 });
 
 const updateLead = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: `Updated a lead ${req.params.id}` });
+  const lead = await Lead.findById(req.params.id)
+
+  if(!lead) {
+    res.status(400)
+    throw new Error('Lead not found')
+  }
+
+  const updatedLead = await Lead.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  })
+
+  res.status(200).json(updatedLead);
 });
 
 const deleteLead = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: `Deleted a lead ${req.params.id}` });
+  const lead = await Lead.findById(req.params.id)
+
+  if(!lead) {
+    res.status(400)
+    throw new Error('Lead not found')
+  }
+
+  await lead.remove()
+  res.status(200).json({ id: req.params.id });
 });
 
 module.exports = { getLeads, setLead, updateLead, deleteLead };
