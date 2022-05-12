@@ -15,6 +15,7 @@ app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 app.use("/api/leads", require("./routes/leadRoutes"));
 app.use("/api/activities", require("./routes/activityRoutes"));
 app.use("/api/contacts", require("./routes/contactRoutes"));
+app.use("/api/users", require("./routes/userRoutes"));
 
 app.use(errorHandler);
 
