@@ -1,9 +1,10 @@
 const asyncHandler = require("express-async-handler");
 
 const Lead = require("../models/leadModel");
+const User = require("../models/userModel");
 
 const getLeads = asyncHandler(async (req, res) => {
-  const leads = await Lead.find();
+  const leads = await Lead.find({ user: req.user.id });
 
   res.status(200).json(leads);
 });
@@ -25,35 +26,65 @@ const setLead = asyncHandler(async (req, res) => {
     lead_source: req.body.lead_source,
     lead_owner: req.body.lead_owner,
     status: req.body.status,
+    user: req.user.id,
   });
 
   res.status(200).json(lead);
 });
 
 const updateLead = asyncHandler(async (req, res) => {
-  const lead = await Lead.findById(req.params.id)
+  const lead = await Lead.findById(req.params.id);
 
-  if(!lead) {
-    res.status(400)
-    throw new Error('Lead not found')
+  if (!lead) {
+    res.status(400);
+    throw new Error("Lead not found");
+  }
+
+  const user = await User.findById(req.user.id);
+
+  //Check for user
+  if (!user) {
+    res.status(401);
+    throw new Error("User not found");
+  }
+
+  //Verify if logged user matches user that created lead record
+  if (lead.user.toString() !== user.id) {
+    res.status(401);
+    throw new Error("User not authorized");
   }
 
   const updatedLead = await Lead.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
-  })
+  });
 
   res.status(200).json(updatedLead);
 });
 
 const deleteLead = asyncHandler(async (req, res) => {
-  const lead = await Lead.findById(req.params.id)
+  const lead = await Lead.findById(req.params.id);
 
-  if(!lead) {
-    res.status(400)
-    throw new Error('Lead not found')
+  if (!lead) {
+    res.status(400);
+    throw new Error("Lead not found");
   }
 
-  await lead.remove()
+  const user = await User.findById(req.user.id);
+
+  //Check for user
+  if (!user) {
+    res.status(401);
+    throw new Error("User not found");
+  }
+
+  //Verify if logged user matches user that created lead record
+  if (lead.user.toString() !== user.id) {
+    res.status(401);
+    throw new Error("User not authorized");
+  }
+
+  await lead.remove();
+
   res.status(200).json({ id: req.params.id });
 });
 

@@ -7,7 +7,9 @@ const {
   deleteLead,
 } = require("../controllers/leadController");
 
-router.route("/").get(getLeads).post(setLead);
-router.route("/:id").put(updateLead).delete(deleteLead);
+const { protect } = require("../middleware/authMiddleware");
+
+router.route("/").get(protect, getLeads).post(protect, setLead);
+router.route("/:id").put(protect, updateLead).delete(protect, deleteLead);
 
 module.exports = router;
