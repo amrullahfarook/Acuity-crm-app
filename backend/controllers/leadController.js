@@ -40,16 +40,14 @@ const updateLead = asyncHandler(async (req, res) => {
     throw new Error("Lead not found");
   }
 
-  const user = await User.findById(req.user.id);
-
   //Check for user
-  if (!user) {
+  if (!req.user) {
     res.status(401);
     throw new Error("User not found");
   }
 
   //Verify if logged user matches user that created lead record
-  if (lead.user.toString() !== user.id) {
+  if (lead.user.toString() !== req.user.id) {
     res.status(401);
     throw new Error("User not authorized");
   }
@@ -69,16 +67,14 @@ const deleteLead = asyncHandler(async (req, res) => {
     throw new Error("Lead not found");
   }
 
-  const user = await User.findById(req.user.id);
-
   //Check for user
-  if (!user) {
+  if (!req.user) {
     res.status(401);
     throw new Error("User not found");
   }
 
   //Verify if logged user matches user that created lead record
-  if (lead.user.toString() !== user.id) {
+  if (lead.user.toString() !== req.user.id) {
     res.status(401);
     throw new Error("User not authorized");
   }
