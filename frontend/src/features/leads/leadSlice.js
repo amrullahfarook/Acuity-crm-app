@@ -28,6 +28,44 @@ export const createLead = createAsyncThunk(
   }
 );
 
+//Get user leads
+export const getLeads = createAsyncThunk(
+  "leads/getAll",
+  async (_, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user.token;
+      return await leadService.getLeads(token);
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+//Delete user lead
+export const deleteLead = createAsyncThunk(
+  "leads/delete",
+  async (id, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user.token;
+      return await leadService.deleteLead(id, token);
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 export const leadSlice = createSlice({
   name: "lead",
   initialState,
@@ -45,6 +83,34 @@ export const leadSlice = createSlice({
         state.leads.push(action.payload);
       })
       .addCase(createLead.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      .addCase(getLeads.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getLeads.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.leads = action.payload;
+      })
+      .addCase(getLeads.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      .addCase(deleteLead.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(deleteLead.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.leads = state.leads.filter(
+          (lead) => lead._id !== action.payload.id
+        );
+      })
+      .addCase(deleteLead.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;
